@@ -2,14 +2,20 @@ name: ${project.artifactId}
 version: ${project.version}
 api-version: "1.13"
 author: denmeh
-main: com.github.unldenis.corpse.CorpsePlugin
-softdepend:
-  - ProtocolLib
-  - ProtocolSupport
-  - ViaVersion
-  - ViaBackwards
-  - ViaRewind
-  - Geyser-Spigot
+main: com.github.denmeh.corpse.CorpsePlugin
+depend:
+  - packetevents
 commands:
-  spawncorpse:
-  removecorpse:
+  corpse:
+    description: Spawn, remove, or reload corpses
+    usage: /<command> <spawn|remove|reload>
+permissions:
+  corpses.spawn:
+    description: Allows using /corpse spawn
+    default: op
+  corpses.remove:
+    description: Allows using /corpse remove
+    default: op
+  corpses.reload:
+    description: Allows using /corpse reload
+    default: op

@@ -1,7 +1,7 @@
-package com.github.unldenis.corpse.event;
+package com.github.denmeh.corpse.event;
 
 import com.github.retrooper.packetevents.wrapper.play.client.WrapperPlayClientInteractEntity;
-import com.github.unldenis.corpse.corpse.Corpse;
+import com.github.denmeh.corpse.corpse.Corpse;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.HandlerList;

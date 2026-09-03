@@ -1,5 +1,5 @@
 ## Set in seconds how long the corpse lasts. (-1 or lower for forever.)
-corpse-time: 10
+corpse-time: 30
 
 ## Sets if corpses spawn on death. (true or false)
 on-death: true
@@ -15,6 +15,15 @@ corpse-distance: 60
 
 ## Lootable corpses
 lootable-corpses: true
+
+## Despawn a lootable corpse when its inventory is empty (fully looted or no drops).
+despawn-when-empty: true
+
+## How close a right-click on the ground must be to a corpse to open loot (blocks).
+loot-click-range: 1.2
+
+## Worlds where corpses spawn on death. Empty = all worlds.
+worlds: []
 
 ## Entity Pose to use for the corpses.
 ## Possible values: SLEEPING, SWIMMING

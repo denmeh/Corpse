@@ -1,22 +1,4 @@
-/*
- * This file is part of packetevents - https://github.com/retrooper/packetevents
- * Copyright (C) 2022 retrooper and contributors
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */
-
-package com.github.unldenis.corpse.corpse;
+package com.github.denmeh.corpse.corpse;
 
 import com.github.retrooper.packetevents.PacketEvents;
 import com.github.retrooper.packetevents.manager.server.ServerVersion;
@@ -26,8 +8,10 @@ import com.github.retrooper.packetevents.protocol.player.*;
 import com.github.retrooper.packetevents.protocol.world.Location;
 import com.github.retrooper.packetevents.wrapper.PacketWrapper;
 import com.github.retrooper.packetevents.wrapper.play.server.*;
+import com.github.denmeh.corpse.CorpsePlugin;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.bukkit.Bukkit;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -52,6 +36,9 @@ class CorpseNPC {
     private ItemStack leggings = null;
     private ItemStack boots = null;
     private final Set<Object> channels = new HashSet<>();
+    private final Set<Object> tabChannels = new HashSet<>();
+
+    private static final long TAB_REMOVE_DELAY_TICKS = 40L;
 
     private CorpseNPC(UserProfile profile, int entityId, @Nullable  WrapperPlayServerTeams.NameTagVisibility nameTagVisibility, GameMode gamemode, @Nullable Component tabName, @Nullable NamedTextColor nameColor,
                      @Nullable Component prefixName, @Nullable Component suffixName) {
@@ -82,15 +69,7 @@ class CorpseNPC {
 
     public void spawn(Object channel) {
         if (hasSpawned(channel)) return;
-        PacketWrapper<?> playerInfo;
-        if (PacketEvents.getAPI().getServerManager().getVersion().isNewerThanOrEquals(ServerVersion.V_1_19_3)) {
-            playerInfo = new WrapperPlayServerPlayerInfoUpdate(WrapperPlayServerPlayerInfoUpdate.Action.ADD_PLAYER,
-                    getModernPlayerInfoData());
-        }
-        else {
-            playerInfo = new WrapperPlayServerPlayerInfo(WrapperPlayServerPlayerInfo.Action.ADD_PLAYER, getLegacyPlayerInfoData());
-        }
-        PacketEvents.getAPI().getProtocolManager().sendPacket(channel, playerInfo);
+        sendAddToTab(channel);
 
         //TODO Later if we want entity metadata, its not supported on newer server versions though(confirm if its mandatory on older versions)
 
@@ -111,10 +90,20 @@ class CorpseNPC {
             PacketEvents.getAPI().getProtocolManager().sendPacket(channel, generateTeamsData());
         }
         channels.add(channel);
+
+        // Skin needs the tab entry briefly; remove it so corpses do not clone the player in tab
+        // and do not block reconnects.
+        final Object spawnedChannel = channel;
+        Bukkit.getScheduler().runTaskLaterAsynchronously(CorpsePlugin.getInstance(), () -> {
+            if (hasSpawned(spawnedChannel)) {
+                sendRemoveFromTab(spawnedChannel);
+            }
+        }, TAB_REMOVE_DELAY_TICKS);
     }
 
     public void despawn(Object channel) {
         if (!hasSpawned(channel)) return;
+        sendRemoveFromTab(channel);
         //TODO Confirm if we need to destroy the team too
         WrapperPlayServerDestroyEntities destroyEntities = new WrapperPlayServerDestroyEntities(getId());
         PacketEvents.getAPI().getProtocolManager().sendPacket(channel, destroyEntities);
@@ -122,11 +111,40 @@ class CorpseNPC {
     }
 
     public void despawnAll() {
-        for (Object channel : channels) {
-            WrapperPlayServerDestroyEntities destroyEntities = new WrapperPlayServerDestroyEntities(getId());
-            PacketEvents.getAPI().getProtocolManager().sendPacket(channel, destroyEntities);
+        for (Object channel : new HashSet<>(channels)) {
+            despawn(channel);
         }
-        channels.clear();
+    }
+
+    private void sendAddToTab(Object channel) {
+        PacketWrapper<?> playerInfo;
+        if (PacketEvents.getAPI().getServerManager().getVersion().isNewerThanOrEquals(ServerVersion.V_1_19_3)) {
+            EnumSet<WrapperPlayServerPlayerInfoUpdate.Action> actions = EnumSet.of(
+                    WrapperPlayServerPlayerInfoUpdate.Action.ADD_PLAYER,
+                    WrapperPlayServerPlayerInfoUpdate.Action.UPDATE_LISTED,
+                    WrapperPlayServerPlayerInfoUpdate.Action.UPDATE_GAME_MODE,
+                    WrapperPlayServerPlayerInfoUpdate.Action.UPDATE_LATENCY
+            );
+            playerInfo = new WrapperPlayServerPlayerInfoUpdate(actions, getModernPlayerInfoData());
+        } else {
+            playerInfo = new WrapperPlayServerPlayerInfo(WrapperPlayServerPlayerInfo.Action.ADD_PLAYER, getLegacyPlayerInfoData());
+        }
+        PacketEvents.getAPI().getProtocolManager().sendPacket(channel, playerInfo);
+        tabChannels.add(channel);
+    }
+
+    private void sendRemoveFromTab(Object channel) {
+        if (!tabChannels.remove(channel)) {
+            return;
+        }
+        PacketWrapper<?> playerInfoRemove;
+        if (PacketEvents.getAPI().getServerManager().getVersion().isNewerThanOrEquals(ServerVersion.V_1_19_3)) {
+            playerInfoRemove = new WrapperPlayServerPlayerInfoRemove(getProfile().getUUID());
+        } else {
+            playerInfoRemove = new WrapperPlayServerPlayerInfo(
+                    WrapperPlayServerPlayerInfo.Action.REMOVE_PLAYER, getLegacyPlayerInfoData());
+        }
+        PacketEvents.getAPI().getProtocolManager().sendPacket(channel, playerInfoRemove);
     }
 
     public void teleport(Location to) {
@@ -235,15 +253,7 @@ class CorpseNPC {
 
     public void changeSkin(UUID skinUUID, List<TextureProperty> skinTextureProperties) {
         for (Object channel : channels) {
-            PacketWrapper<?> playerInfoRemove;
-            if (PacketEvents.getAPI().getServerManager().getVersion().isNewerThanOrEquals(ServerVersion.V_1_19_3)) {
-                playerInfoRemove = new WrapperPlayServerPlayerInfoRemove(getProfile().getUUID());
-            }
-            else {
-                playerInfoRemove =
-                        new WrapperPlayServerPlayerInfo(WrapperPlayServerPlayerInfo.Action.REMOVE_PLAYER, getLegacyPlayerInfoData());
-            }
-            PacketEvents.getAPI().getProtocolManager().sendPacket(channel, playerInfoRemove);
+            sendRemoveFromTab(channel);
 
             WrapperPlayServerDestroyEntities destroyEntities =
                     new WrapperPlayServerDestroyEntities(getId());
@@ -251,16 +261,7 @@ class CorpseNPC {
 
             getProfile().setTextureProperties(skinTextureProperties);
             getProfile().setUUID(skinUUID);
-            PacketWrapper<?> playerInfoAdd;
-            if (PacketEvents.getAPI().getServerManager().getVersion().isNewerThanOrEquals(ServerVersion.V_1_19_3)) {
-                playerInfoAdd = new WrapperPlayServerPlayerInfoUpdate(WrapperPlayServerPlayerInfoUpdate.Action.ADD_PLAYER,
-                        getModernPlayerInfoData());
-            }
-            else {
-                playerInfoAdd =
-                        new WrapperPlayServerPlayerInfo(WrapperPlayServerPlayerInfo.Action.ADD_PLAYER, getLegacyPlayerInfoData());
-            }
-            PacketEvents.getAPI().getProtocolManager().sendPacket(channel, playerInfoAdd);
+            sendAddToTab(channel);
 
             PacketWrapper<?> spawnPacket;
             if (PacketEvents.getAPI().getServerManager().getVersion().isNewerThanOrEquals(ServerVersion.V_1_20_2)) {
@@ -470,7 +471,7 @@ class CorpseNPC {
     }
 
     public WrapperPlayServerPlayerInfoUpdate.PlayerInfo getModernPlayerInfoData() {
-        return new WrapperPlayServerPlayerInfoUpdate.PlayerInfo(getProfile(), true,
+        return new WrapperPlayServerPlayerInfoUpdate.PlayerInfo(getProfile(), false,
                 getDisplayPing(), getGameMode(), getTabName(), null);
     }
 

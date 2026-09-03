@@ -1,4 +1,4 @@
-package com.github.unldenis.corpse.model;
+package com.github.denmeh.corpse.model;
 
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;

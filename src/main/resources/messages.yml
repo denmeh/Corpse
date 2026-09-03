@@ -5,14 +5,16 @@
 no-permission: "&cYou don't have permission to use this command."
 players-only: "&cOnly players can run this command."
 
-# Spawn corpse command
+# Corpse command
 corpse-created: "&aCorpse created"
-spawncorpse-usage: "&c/spawncorpse [Player] - Spawns a corpse of a player if the name is given else it just spawns a corpse of yourself."
+corpse-usage: "&c/corpse <spawn|remove|reload>"
+config-reloaded: "&aCorpse config reloaded."
+spawn-usage: "&c/corpse spawn [player] - Spawns a corpse of a player if the name is given else it just spawns a corpse of yourself."
 
 # Remove corpse command
 corpses-deleted: "&a({amount}) Corpses deleted"
 radius-not-number: "&cRadius must be a number"
-removecorpse-usage: "&c/removecorpse [radius] - Removes any corpse(s) in a radius of you."
+remove-usage: "&c/corpse remove <radius> - Removes any corpse(s) in a radius of you."
 
 # Lootable corpse
 corpse-already-looted: "&cCorpse already looted"

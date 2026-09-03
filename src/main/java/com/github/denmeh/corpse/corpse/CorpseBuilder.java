@@ -1,4 +1,4 @@
-package com.github.unldenis.corpse.corpse;
+package com.github.denmeh.corpse.corpse;
 
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
@@ -12,7 +12,7 @@ import java.util.List;
 
 import org.jetbrains.annotations.NotNull;
 
-import com.github.unldenis.corpse.model.CorpseArmor;
+import com.github.denmeh.corpse.model.CorpseArmor;
 
 /**
  * Builder for creating a Corpse object.
