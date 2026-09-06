@@ -1,12 +1,13 @@
 # Corpse
 
 [![](https://jitpack.io/v/denmeh/Corpse.svg)](https://jitpack.io/#denmeh/Corpse)
+[![Spigot](https://img.shields.io/spiget/downloads/99482?label=Spigot)](https://www.spigotmc.org/resources/corpse-lightweight-asynchronous-1-8-26-2.99482/)
 [![bStats Servers](https://img.shields.io/bstats/servers/33830?label=servers)](https://bstats.org/plugin/bukkit/Corpse/33830)
 [![bStats Players](https://img.shields.io/bstats/players/33830?label=players)](https://bstats.org/plugin/bukkit/Corpse/33830)
 
 Dead bodies in Minecraft for 1.8–26.2 servers.
 
-See [CHANGELOG.md](CHANGELOG.md) for release history.
+Download: [Spigot](https://www.spigotmc.org/resources/corpse-lightweight-asynchronous-1-8-26-2.99482/). See [CHANGELOG.md](CHANGELOG.md) for release history.
 
 
 ## Installation
