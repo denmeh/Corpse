@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.github.denmeh.corpse</groupId>
   <artifactId>Corpse</artifactId>
-  <version>4.0.0</version>
+  <version>4.1.0</version>
   <build>
     <resources>
       <resource>

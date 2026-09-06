@@ -10,6 +10,7 @@ import com.github.denmeh.corpse.event.AsyncCorpseInteractEvent;
 import com.google.common.collect.*;
 import org.bukkit.*;
 import org.bukkit.block.Block;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.*;
 import org.bukkit.entity.*;
 import org.bukkit.event.*;
@@ -38,6 +39,7 @@ public class CorpsePool implements Listener {
   //config options
   private double spawnDistance;
   private int timeRemove;
+  private List<TimeGroup> timeGroups;
   private boolean onDeath;
   private boolean showTags;
   private boolean renderArmor;
@@ -67,6 +69,7 @@ public class CorpsePool implements Listener {
     FileConfiguration config = plugin.getConfigYml();
     this.spawnDistance = Math.pow(config.getInt("corpse-distance"), 2);
     this.timeRemove = config.getInt("corpse-time");
+    this.timeGroups = loadTimeGroups(config);
     this.onDeath = config.getBoolean("on-death");
     this.showTags = config.getBoolean("show-tags");
     this.renderArmor = config.getBoolean("render-armor");
@@ -184,6 +187,78 @@ public class CorpsePool implements Listener {
 
   public int getTimeRemove() {
     return timeRemove;
+  }
+
+  /**
+   * Lifetime in seconds for this player's corpse. First matching
+   * {@code corpse-time-groups} permission wins; otherwise {@link #getTimeRemove()}.
+   */
+  public int getTimeRemove(@Nullable Player player) {
+    if (player != null) {
+      for (TimeGroup group : this.timeGroups) {
+        if (player.hasPermission(group.permission)) {
+          return group.time;
+        }
+      }
+    }
+    return this.timeRemove;
+  }
+
+  @NotNull
+  private static List<TimeGroup> loadTimeGroups(@NotNull FileConfiguration config) {
+    List<TimeGroup> groups = new ArrayList<>();
+    List<?> raw = config.getList("corpse-time-groups");
+    if (raw == null) {
+      return groups;
+    }
+    for (Object entry : raw) {
+      Map<?, ?> map = asMap(entry);
+      if (map == null) {
+        continue;
+      }
+      Object permission = map.get("permission");
+      Object time = map.get("time");
+      if (permission == null || time == null) {
+        continue;
+      }
+      String permissionName = permission.toString().trim();
+      if (permissionName.isEmpty()) {
+        continue;
+      }
+      try {
+        groups.add(new TimeGroup(permissionName, parseTime(time)));
+      } catch (NumberFormatException ignored) {
+      }
+    }
+    return groups;
+  }
+
+  @Nullable
+  private static Map<?, ?> asMap(@Nullable Object entry) {
+    if (entry instanceof Map) {
+      return (Map<?, ?>) entry;
+    }
+    if (entry instanceof ConfigurationSection) {
+      return ((ConfigurationSection) entry).getValues(false);
+    }
+    return null;
+  }
+
+  private static int parseTime(@NotNull Object value) {
+    if (value instanceof Number) {
+      return ((Number) value).intValue();
+    }
+    return Integer.parseInt(value.toString().trim());
+  }
+
+  private static final class TimeGroup {
+    private final String permission;
+    private final int time;
+
+    private TimeGroup(@NotNull String permission, int time) {
+      this.permission = permission;
+      this.time = time;
+    }
   }
 
   public boolean isRenderArmor() {

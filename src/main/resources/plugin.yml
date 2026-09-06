@@ -19,3 +19,6 @@ permissions:
   corpses.reload:
     description: Allows using /corpse reload
     default: op
+  corpses.time:
+    description: Base node for corpse-time-groups permissions in config.yml
+    default: false

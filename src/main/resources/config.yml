@@ -1,6 +1,19 @@
 ## Set in seconds how long the corpse lasts. (-1 or lower for forever.)
 corpse-time: 30
 
+## Permission groups for corpse lifetime. First matching permission wins.
+## Players without a matching permission use corpse-time.
+## Time is in seconds (-1 = never despawn). Put higher ranks first.
+corpse-time-groups: []
+# Example:
+# corpse-time-groups:
+#   - permission: corpses.time.legend
+#     time: 2592000   # 30 days
+#   - permission: corpses.time.mvp
+#     time: 36000     # 10 hours
+#   - permission: corpses.time.vip
+#     time: 18000     # 5 hours
+
 ## Sets if corpses spawn on death. (true or false)
 on-death: true
 

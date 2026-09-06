@@ -6,6 +6,8 @@
 
 Dead bodies in Minecraft for 1.8–26.2 servers.
 
+See [CHANGELOG.md](CHANGELOG.md) for release history.
+
 
 ## Installation
 
@@ -25,6 +27,7 @@ Dead bodies in Minecraft for 1.8–26.2 servers.
 ## Config (`config.yml`)
 
 - `corpse-time` – Seconds before a corpse despawns (`-1` = never). Leftover loot is dropped on the ground.
+- `corpse-time-groups` – Optional permission groups that override `corpse-time`. First matching permission wins (put higher ranks first). Everyone else still uses `corpse-time`.
 - `on-death` – Spawn a corpse when a player dies.
 - `show-tags` – Show name tags above corpses.
 - `render-armor` – Render armor/items on the corpse.
@@ -60,6 +63,9 @@ Corpse corpse = Corpse.fromLocation(location).name(offlinePlayer.getName()).spaw
 CorpseArmor armor = new CorpseArmor().boots(boots).leggings(leggings).chestplate(chestplate).helmet(helmet);
 Corpse corpse = Corpse.fromPlayer(player).location(location).armor(armor).spawn();
 Corpse corpse = Corpse.fromLocation(location).name(name).armor(armor).spawn();
+
+// Override despawn time in seconds (-1 = never)
+Corpse corpse = Corpse.fromPlayer(player).time(3600).spawn();
 
 // Remove a corpse
 corpse.destroy();

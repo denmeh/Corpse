@@ -69,6 +69,16 @@ public class Corpse {
             @Nullable CorpseArmor armor,
             @Nullable String name
     ) {
+        this(location, textures, armor, name, CorpsePool.getInstance().getTimeRemove());
+    }
+
+    Corpse(
+            @NotNull Location location,
+            @NotNull List<TextureProperty> textures,
+            @Nullable CorpseArmor armor,
+            @Nullable String name,
+            int time
+    ) {
         pool = CorpsePool.getInstance();
 
         this.id = pool.getFreeEntityId();
@@ -94,7 +104,6 @@ public class Corpse {
         pool.takeCareOf(this);
 
         //remove eventually corpse after X seconds
-        int time = pool.getTimeRemove();
         if (time > -1) {
             Bukkit.getScheduler()
                     .runTaskLaterAsynchronously(CorpsePlugin.getInstance(), () -> pool.remove(this.id),

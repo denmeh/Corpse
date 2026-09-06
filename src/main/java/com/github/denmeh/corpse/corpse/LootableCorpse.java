@@ -2,6 +2,7 @@ package com.github.denmeh.corpse.corpse;
 
 import com.github.denmeh.corpse.CorpsePlugin;
 import com.github.denmeh.corpse.model.CorpseArmor;
+import com.github.denmeh.corpse.pool.CorpsePool;
 import io.github.retrooper.packetevents.util.SpigotReflectionUtil;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -24,7 +25,8 @@ public class LootableCorpse extends Corpse implements InventoryHolder {
     private final Inventory inventory;
 
     public LootableCorpse(Location location, Player player, List<ItemStack> items) {
-        super(location, SpigotReflectionUtil.getUserProfile(player), new CorpseArmor(player), player.getName());
+        super(location, SpigotReflectionUtil.getUserProfile(player), new CorpseArmor(player), player.getName(),
+                CorpsePool.getInstance().getTimeRemove(player));
         this.inventory = Bukkit.createInventory(this, 54, CorpsePlugin.getInstance().getMessages().getLootInventoryTitle());
         int slot = 0;
         for (ItemStack item : items) {

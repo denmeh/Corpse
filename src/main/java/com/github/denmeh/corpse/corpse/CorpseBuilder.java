@@ -13,6 +13,7 @@ import java.util.List;
 import org.jetbrains.annotations.NotNull;
 
 import com.github.denmeh.corpse.model.CorpseArmor;
+import com.github.denmeh.corpse.pool.CorpsePool;
 
 /**
  * Builder for creating a Corpse object.
@@ -23,6 +24,8 @@ public class CorpseBuilder {
     private List<TextureProperty> textures = new ArrayList<>();
     private CorpseArmor armor = null;
     private String name = null;
+    private Player player = null;
+    private Integer time = null;
 
     /**
      * Constructor for creating a CorpseBuilder with a player.
@@ -33,6 +36,7 @@ public class CorpseBuilder {
         this.textures = SpigotReflectionUtil.getUserProfile(player);
         this.armor = new CorpseArmor(player);
         this.name = player.getName();
+        this.player = player;
     }
 
     /**
@@ -84,10 +88,29 @@ public class CorpseBuilder {
     }
 
     /**
+     * Override how long the corpse lasts, in seconds. {@code -1} means never despawn.
+     * If unset, the owner's {@code corpse-time-groups} permission is used when known,
+     * otherwise {@code corpse-time}.
+     * @param time Seconds before despawn, or {@code -1} for forever.
+     * @return This builder.
+     */
+    public CorpseBuilder time(int time) {
+        this.time = time;
+        return this;
+    }
+
+    /**
      * Spawn the corpse in the world.
      * @return The spawned Corpse instance.
      */
     public Corpse spawn() {
-        return new Corpse(location, textures, armor, name);
+        return new Corpse(location, textures, armor, name, resolveTime());
+    }
+
+    private int resolveTime() {
+        if (this.time != null) {
+            return this.time;
+        }
+        return CorpsePool.getInstance().getTimeRemove(this.player);
     }
 }
