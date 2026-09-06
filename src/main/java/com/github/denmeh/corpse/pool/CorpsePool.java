@@ -110,6 +110,13 @@ public class CorpsePool implements Listener {
 
   private void corpseTick() {
     tickTask = Bukkit.getScheduler().runTaskTimerAsynchronously(this.plugin, () -> {
+      long now = System.currentTimeMillis();
+      for (Corpse corpse : this.corpseMap.values()) {
+        if (corpse.isExpired(now)) {
+          this.remove(corpse.getId());
+        }
+      }
+
       for (Player player : ImmutableList.copyOf(Bukkit.getOnlinePlayers())) {
         for (Corpse corpse : this.corpseMap.values()) {
           Location holoLoc = corpse.getLocation();

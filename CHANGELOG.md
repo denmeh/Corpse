@@ -5,6 +5,11 @@ All notable changes to this project are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [4.1.1] - 2026-09-06
+
+### Changed
+- Corpse lifetime is now a wall-clock expiration checked by the existing tick, not a delayed Bukkit task.
+
 ## [4.1.0] - 2026-09-06
 
 ### Added
@@ -130,7 +135,8 @@ Dead bodies for Minecraft **1.8–26.2**.
 
 Initial release: packet-based player corpses.
 
-[4.1.0]: https://github.com/denmeh/Corpse/compare/4.0.0...HEAD
+[4.1.1]: https://github.com/denmeh/Corpse/compare/4.1.0...HEAD
+[4.1.0]: https://github.com/denmeh/Corpse/compare/4.0.0...4.1.0
 [4.0.0]: https://github.com/denmeh/Corpse/compare/3.0.0...4.0.0
 [3.0.0]: https://github.com/denmeh/Corpse/compare/2.1.1...3.0.0
 [2.1.1]: https://github.com/denmeh/Corpse/compare/2.1.0-rc.2...2.1.1

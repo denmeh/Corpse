@@ -6,7 +6,7 @@
 
     <groupId>com.github.denmeh.corpse</groupId>
     <artifactId>Corpse</artifactId>
-    <version>4.1.0</version>
+    <version>4.1.1</version>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>

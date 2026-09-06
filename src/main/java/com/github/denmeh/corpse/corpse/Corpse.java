@@ -11,13 +11,11 @@ import com.github.retrooper.packetevents.util.Vector3i;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerEntityMetadata;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerTeams;
 import com.github.retrooper.packetevents.wrapper.play.server.WrapperPlayServerUseBed;
-import com.github.denmeh.corpse.CorpsePlugin;
 import com.github.denmeh.corpse.model.CorpseArmor;
 import com.github.denmeh.corpse.pool.CorpsePool;
 import com.github.denmeh.corpse.util.BedUtil;
 import com.github.denmeh.corpse.util.ProfileUtils;
 import io.github.retrooper.packetevents.util.SpigotConversionUtil;
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -62,6 +60,7 @@ public class Corpse {
 
     private final CorpseNPC internalNPC;
     private final boolean hasArmor;
+    private final long expiresAtMillis;
 
     Corpse(
             @NotNull Location location,
@@ -103,13 +102,9 @@ public class Corpse {
         //pool take care
         pool.takeCareOf(this);
 
-        //remove eventually corpse after X seconds
-        if (time > -1) {
-            Bukkit.getScheduler()
-                    .runTaskLaterAsynchronously(CorpsePlugin.getInstance(), () -> pool.remove(this.id),
-                            20L * time);
-        }
-
+        this.expiresAtMillis = time > -1
+                ? System.currentTimeMillis() + (time * 1000L)
+                : Long.MAX_VALUE;
     }
 
     @ApiStatus.Internal
@@ -162,6 +157,10 @@ public class Corpse {
 
     public boolean isShownFor(@NotNull Player player) {
         return this.seeingPlayers.contains(player);
+    }
+
+    public boolean isExpired(long nowMillis) {
+        return nowMillis >= this.expiresAtMillis;
     }
 
     /**

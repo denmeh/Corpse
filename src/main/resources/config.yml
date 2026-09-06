@@ -8,11 +8,11 @@ corpse-time-groups: []
 # Example:
 # corpse-time-groups:
 #   - permission: corpses.time.legend
-#     time: 2592000   # 30 days
+#     time: 21600     # 6 hours
 #   - permission: corpses.time.mvp
-#     time: 36000     # 10 hours
+#     time: 3600      # 1 hour
 #   - permission: corpses.time.vip
-#     time: 18000     # 5 hours
+#     time: 300       # 5 minutes
 
 ## Sets if corpses spawn on death. (true or false)
 on-death: true
