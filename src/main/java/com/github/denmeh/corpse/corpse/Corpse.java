@@ -55,6 +55,7 @@ public class Corpse {
     protected final int id;
     protected final Location location;
     protected final UserProfile profile;
+    private final String name;
     private final Collection<Player> seeingPlayers = new CopyOnWriteArraySet<>();
     private final CorpsePool pool;
 
@@ -82,7 +83,11 @@ public class Corpse {
 
         this.id = pool.getFreeEntityId();
         this.location = location;
-        this.profile = new UserProfile(UUID.randomUUID(), name != null ? name : ProfileUtils.randomName(), textures);
+        this.name = name != null ? name : ProfileUtils.randomName();
+        // The team that hides the name tag matches entries by profile name: with the real name it
+        // would also catch the living player and pull them out of the teams that sort the tab list.
+        String profileName = pool.isShowTags() ? this.name : ProfileUtils.randomName();
+        this.profile = new UserProfile(UUID.randomUUID(), profileName, textures);
 
         // create npc
         internalNPC = new CorpseNPC(profile, id,
@@ -184,7 +189,7 @@ public class Corpse {
      */
     @NotNull
     public String getName() {
-        return profile.getName();
+        return name;
     }
 
     /**

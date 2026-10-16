@@ -85,8 +85,7 @@ class CorpseNPC {
         PacketEvents.getAPI().getProtocolManager().sendPacket(channel, spawnPacket);
 
         //Create team
-        if (nameTagVisibility != null || getNameColor() != null || getPrefixName() != null
-                || getSuffixName() != null) {
+        if (hasTeam()) {
             PacketEvents.getAPI().getProtocolManager().sendPacket(channel, generateTeamsData());
         }
         channels.add(channel);
@@ -104,10 +103,22 @@ class CorpseNPC {
     public void despawn(Object channel) {
         if (!hasSpawned(channel)) return;
         sendRemoveFromTab(channel);
-        //TODO Confirm if we need to destroy the team too
         WrapperPlayServerDestroyEntities destroyEntities = new WrapperPlayServerDestroyEntities(getId());
         PacketEvents.getAPI().getProtocolManager().sendPacket(channel, destroyEntities);
+        // The client keeps the team until told otherwise: without this every corpse seen leaves
+        // a team behind until the viewer disconnects.
+        if (hasTeam()) {
+            WrapperPlayServerTeams removeTeam = new WrapperPlayServerTeams(teamName,
+                    WrapperPlayServerTeams.TeamMode.REMOVE,
+                    Optional.empty());
+            PacketEvents.getAPI().getProtocolManager().sendPacket(channel, removeTeam);
+        }
         channels.remove(channel);
+    }
+
+    private boolean hasTeam() {
+        return nameTagVisibility != null || getNameColor() != null || getPrefixName() != null
+                || getSuffixName() != null;
     }
 
     public void despawnAll() {
@@ -284,8 +295,7 @@ class CorpseNPC {
                         Optional.empty());
         PacketEvents.getAPI().getProtocolManager().sendPacket(channel, removeTeam);
 
-        if (nameTagVisibility != null || this.getNameColor() != null || this.getPrefixName() != null
-                || this.getSuffixName() != null) {
+        if (hasTeam()) {
             PacketEvents.getAPI().getProtocolManager().sendPacket(channel, generateTeamsData());
         }
     }
